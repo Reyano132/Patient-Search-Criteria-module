@@ -21,15 +21,15 @@
 	
   <dependencies>
     <dependency>
-	    <groupId>com.github.Reyano132.openmrs-core-tmp</groupId>
+	    <groupId>com.github.Reyano132.openmrs-core</groupId>
 	    <artifactId>openmrs-api</artifactId>
-	    <version>2.3.0</version>
+	    <version>0112f622</version>
 	    <scope>provided</scope>
 	</dependency>
     <dependency>
-	    <groupId>com.github.Reyano132.openmrs-core-tmp</groupId>
+	    <groupId>com.github.Reyano132.openmrs-core</groupId>
 	    <artifactId>openmrs-api</artifactId>
-	    <version>2.3.0</version>
+	    <version>0112f622</version>
 	    <type>test-jar</type>
 	    <scope>provided</scope>
 	</dependency>
