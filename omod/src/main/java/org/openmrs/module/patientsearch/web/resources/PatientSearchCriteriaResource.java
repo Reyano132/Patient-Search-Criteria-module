@@ -1,6 +1,7 @@
 package org.openmrs.module.patientsearch.web.resources;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -233,8 +234,19 @@ public class PatientSearchCriteriaResource extends DataDelegatingCrudResource<Pa
 	 */
 	@Override
 	protected AlreadyPaged<Patient> doSearch(RequestContext context) {
-		return new ServiceSearcher<Patient>(PatientService.class, "getPatients", "getCountOfPatients").search(
-		    context.getParameter("q"), context);
+		String q = context.getParameter("q");
+		String gender = context.getParameter("gender");
+		String toString = context.getParameter("to");
+		String fromString = context.getParameter("from");
+		String birthdateString = context.getParameter("birthdate");
+		Integer to = (toString == null) ? null : Integer.parseInt(toString);
+		Integer from = (fromString == null) ? null : Integer.parseInt(fromString);
+		Date birthdate = (birthdateString == null) ? null : new Date(Long.valueOf(birthdateString));
+		List<Patient> patients = Context.getService(PatientSearchCriteriaService.class).getPatients(null, q, null, true,
+		    gender, from, to, birthdate);
+		Long count = Long.valueOf(patients.size());
+		boolean hasMore = count > context.getStartIndex() + context.getLimit();
+		return new AlreadyPaged<Patient>(context, patients, hasMore, count);
 	}
 	
 	/**
