@@ -46,7 +46,7 @@ public class DateLuceneQuery<T> extends LuceneQuery<T> {
 				
 				QueryBuilder queryBuilder = getFullTextSession().getSearchFactory().buildQueryBuilder().forEntity(type)
 				        .get();
-				return queryBuilder.range().onField(field).from(from.getTime()).to(to.getTime()).createQuery();
+				return queryBuilder.range().onField(field).from(to.getTime()).to(from.getTime()).createQuery();
 				
 			}
 		};

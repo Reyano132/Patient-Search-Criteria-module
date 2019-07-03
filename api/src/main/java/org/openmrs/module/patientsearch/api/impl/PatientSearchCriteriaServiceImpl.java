@@ -39,7 +39,7 @@ public class PatientSearchCriteriaServiceImpl extends PatientServiceImpl impleme
 	
 	@Override
 	public List<Patient> getPatients(String name, String identifier, List<PatientIdentifierType> identifierTypes,
-	        boolean matchIdentifierExactly, String gender, Integer to, Integer from, Date birthdate) throws APIException {
+	        boolean matchIdentifierExactly, String gender, Integer from, Integer to, Date birthdate) throws APIException {
 		if (identifierTypes == null) {
 			Date fromDate = null;
 			Date toDate = null;

@@ -41,9 +41,9 @@ public interface PatientSearchCriteriaService extends PatientService {
 	 * @param gender(optional) : if user want to search patient by gender or filter the search
 	 *            result by gender. value of gender parameter is either "M" or "F".
 	 * @param to(optional) : user wants to search patients having age between some range, at that
-	 *            time this paramater represent the lower boundary of range.
-	 * @param from(optional):user wants to search patients having age between some range, at that
 	 *            time this paramater represent the upper boundary of range.
+	 * @param from(optional):user wants to search patients having age between some range, at that
+	 *            time this paramater represent the lower boundary of range.
 	 * @param birthdate(optional) : User can search patient by birthdate.
 	 * @return patients that matched the given criteria (and are not voided)
 	 * @throws APIException
@@ -66,6 +66,6 @@ public interface PatientSearchCriteriaService extends PatientService {
 	 */
 	@Authorized({ PrivilegeConstants.GET_PATIENTS })
 	public List<Patient> getPatients(String name, String identifier, List<PatientIdentifierType> identifierTypes,
-	        boolean matchIdentifierExactly, String gender, Integer to, Integer from, Date birthdate) throws APIException;
+	        boolean matchIdentifierExactly, String gender, Integer from, Integer to, Date birthdate) throws APIException;
 	
 }
