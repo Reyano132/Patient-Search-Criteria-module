@@ -64,8 +64,8 @@ public class PatientSearchCriteriaDAOTest extends BaseModuleContextSensitiveTest
 	 */
 	@Test
 	public void getPatientByAge() {
-		GregorianCalendar from = new GregorianCalendar(2013, 7, 28);
-		GregorianCalendar to = new GregorianCalendar(2015, 7, 28);
+		GregorianCalendar to = new GregorianCalendar(2013, 7, 28);
+		GregorianCalendar from = new GregorianCalendar(2015, 7, 28);
 		List<Patient> patients = dao.getPatients(from.getTime(), to.getTime(), 0, 11, false);
 		Assert.assertEquals(3, patients.size());
 	}
@@ -98,8 +98,8 @@ public class PatientSearchCriteriaDAOTest extends BaseModuleContextSensitiveTest
 	 */
 	@Test
 	public void getPatientsByGivenNameAndAgeRange() {
-		GregorianCalendar from = new GregorianCalendar(2013, 7, 28);
-		GregorianCalendar to = new GregorianCalendar(2015, 7, 28);
+		GregorianCalendar to = new GregorianCalendar(2013, 7, 28);
+		GregorianCalendar from = new GregorianCalendar(2015, 7, 28);
 		List<Patient> patients = dao.getPatients("Bethany", from.getTime(), to.getTime(), 0, 11, false);
 		Assert.assertEquals(1, patients.size());
 		Assert.assertEquals("Bethany", patients.get(0).getGivenName());
@@ -123,8 +123,8 @@ public class PatientSearchCriteriaDAOTest extends BaseModuleContextSensitiveTest
 	 */
 	@Test
 	public void getPatientsByGivenNameAndAgeRangeAndGender() {
-		GregorianCalendar from = new GregorianCalendar(2013, 7, 28);
-		GregorianCalendar to = new GregorianCalendar(2015, 7, 28);
+		GregorianCalendar to = new GregorianCalendar(2013, 7, 28);
+		GregorianCalendar from = new GregorianCalendar(2015, 7, 28);
 		List<Patient> patients = dao.getPatients("Adam", "M", from.getTime(), to.getTime(), 0, 11, false);
 		Assert.assertEquals(1, patients.size());
 		Assert.assertEquals("Adam", patients.get(0).getGivenName());
@@ -158,8 +158,8 @@ public class PatientSearchCriteriaDAOTest extends BaseModuleContextSensitiveTest
 	 */
 	@Test
 	public void getPatientsByMiddleNameAndAgeRange() {
-		GregorianCalendar from = new GregorianCalendar(2014, 7, 28);
-		GregorianCalendar to = new GregorianCalendar(2015, 7, 28);
+		GregorianCalendar to = new GregorianCalendar(2014, 7, 28);
+		GregorianCalendar from = new GregorianCalendar(2015, 7, 28);
 		List<Patient> patients = dao.getPatients("Benedict", from.getTime(), to.getTime(), 0, 11, false);
 		Assert.assertEquals(1, patients.size());
 		Assert.assertEquals("Benedict", patients.get(0).getMiddleName());
@@ -183,8 +183,8 @@ public class PatientSearchCriteriaDAOTest extends BaseModuleContextSensitiveTest
 	 */
 	@Test
 	public void getPatientsByMiddleNameAndAgeRangeAndGender() {
-		GregorianCalendar from = new GregorianCalendar(2013, 7, 28);
-		GregorianCalendar to = new GregorianCalendar(2015, 7, 28);
+		GregorianCalendar to = new GregorianCalendar(2013, 7, 28);
+		GregorianCalendar from = new GregorianCalendar(2015, 7, 28);
 		List<Patient> patients = dao.getPatients("Frank", "F", from.getTime(), to.getTime(), 0, 11, false);
 		Assert.assertEquals(1, patients.size());
 		Assert.assertEquals("Frank", patients.get(0).getMiddleName());
@@ -220,8 +220,8 @@ public class PatientSearchCriteriaDAOTest extends BaseModuleContextSensitiveTest
 	 */
 	@Test
 	public void getPatientsByfamilyNameAndAgeRange() {
-		GregorianCalendar from = new GregorianCalendar(2013, 7, 28);
-		GregorianCalendar to = new GregorianCalendar(2015, 7, 28);
+		GregorianCalendar to = new GregorianCalendar(2013, 7, 28);
+		GregorianCalendar from = new GregorianCalendar(2015, 7, 28);
 		List<Patient> patients = dao.getPatients("Franklin", from.getTime(), to.getTime(), 0, 11, false);
 		Assert.assertEquals(1, patients.size());
 		Assert.assertEquals("Adam", patients.get(0).getGivenName());
@@ -245,8 +245,8 @@ public class PatientSearchCriteriaDAOTest extends BaseModuleContextSensitiveTest
 	 */
 	@Test
 	public void getPatientsByfamilyNameAndAgeRangeAndGender() {
-		GregorianCalendar from = new GregorianCalendar(2013, 7, 28);
-		GregorianCalendar to = new GregorianCalendar(2015, 7, 28);
+		GregorianCalendar to = new GregorianCalendar(2013, 7, 28);
+		GregorianCalendar from = new GregorianCalendar(2015, 7, 28);
 		List<Patient> patients = dao.getPatients("Franklin", "M", from.getTime(), to.getTime(), 0, 11, false);
 		Assert.assertEquals(1, patients.size());
 		Assert.assertEquals("Adam", patients.get(0).getGivenName());
