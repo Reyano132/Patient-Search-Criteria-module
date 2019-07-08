@@ -1,7 +1,6 @@
 package org.openmrs.module.patientsearch.web.resources;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -9,8 +8,6 @@ import org.openmrs.Patient;
 import org.openmrs.Person;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.patientsearch.api.PatientSearchCriteriaService;
-import org.openmrs.module.patientsearch.api.impl.PatientSearchCriteriaServiceImpl;
 import org.openmrs.module.patientsearch.web.controller.PatientSearchCriteriaController;
 import org.openmrs.module.webservices.rest.SimpleObject;
 import org.openmrs.module.webservices.rest.web.ConversionUtil;
@@ -27,17 +24,10 @@ import org.openmrs.module.webservices.rest.web.resource.impl.DataDelegatingCrudR
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.resource.impl.ServiceSearcher;
 import org.openmrs.module.webservices.rest.web.response.ConversionException;
-import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.openmrs.module.webservices.rest.web.v1_0.resource.openmrs1_8.PersonResource1_8;
 import org.openmrs.module.webservices.validation.ValidateUtil;
 
-import io.swagger.models.Model;
-import io.swagger.models.ModelImpl;
-import io.swagger.models.properties.ArrayProperty;
-import io.swagger.models.properties.BooleanProperty;
-import io.swagger.models.properties.RefProperty;
-import io.swagger.models.properties.StringProperty;
 
 @Resource(name = RestConstants.VERSION_1 + PatientSearchCriteriaController.PATIENTSEARCH_REST_NAMESPACE + "/patient", supportedClass = Patient.class, supportedOpenmrsVersions = {
         "1.8.*", "1.9.*", "1.10.*, 1.11.*", "1.12.*", "2.0.*", "2.1.*", "2.2.*", "2.3.*" })
@@ -73,42 +63,6 @@ public class PatientSearchCriteriaResource extends DataDelegatingCrudResource<Pa
 			return description;
 		}
 		return null;
-	}
-	
-	@Override
-	public Model getGETModel(Representation rep) {
-		ModelImpl model = (ModelImpl) super.getGETModel(rep);
-		//FIXME check uuid, display in ref rep
-		if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
-			model.property("uuid", new StringProperty()).property("display", new StringProperty())
-			        .property("identifiers", new ArrayProperty(new RefProperty("#/definitions/PatientIdentifierGetRef")))
-			        .property("preferred", new BooleanProperty()._default(false)).property("voided", new BooleanProperty());
-		}
-		if (rep instanceof DefaultRepresentation) {
-			model.property("person", new RefProperty("#/definitions/PersonGetRef"));
-		} else if (rep instanceof FullRepresentation) {
-			model.property("person", new RefProperty("#/definitions/PersonGet"));
-		}
-		return model;
-	}
-	
-	@Override
-	public Model getCREATEModel(Representation rep) {
-		ModelImpl model = new ModelImpl().property("person", new StringProperty().example("uuid"))
-		        .property("identifiers", new ArrayProperty(new RefProperty("#/definitions/PatientIdentifierCreate")))
-		        
-		        .required("person").required("identifiers");
-		if (rep instanceof FullRepresentation) {
-			model.property("person", new RefProperty("#/definitions/PersonCreate"));
-		}
-		return model;
-	}
-	
-	@Override
-	public Model getUPDATEModel(Representation rep) {
-		return new ModelImpl().property("person", new RefProperty("#/definitions/PersonGet"))
-		
-		.required("person");
 	}
 	
 	/**
@@ -195,6 +149,7 @@ public class PatientSearchCriteriaResource extends DataDelegatingCrudResource<Pa
 	 * @see org.openmrs.module.webservices.rest.web.resource.impl.DelegatingCrudResource#delete(java.lang.Object,
 	 *      java.lang.String, org.openmrs.module.webservices.rest.web.RequestContext)
 	 */
+	@SuppressWarnings("deprecation")
 	@Override
 	public void delete(Patient patient, String reason, RequestContext context) throws ResponseException {
 		if (patient.isVoided()) {
@@ -208,6 +163,7 @@ public class PatientSearchCriteriaResource extends DataDelegatingCrudResource<Pa
 	 * @see org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResource#undelete(java.lang.Object,
 	 *      org.openmrs.module.webservices.rest.web.RequestContext)
 	 */
+	@SuppressWarnings("deprecation")
 	@Override
 	protected Patient undelete(Patient patient, RequestContext context) throws ResponseException {
 		if (patient.isVoided()) {
@@ -234,19 +190,8 @@ public class PatientSearchCriteriaResource extends DataDelegatingCrudResource<Pa
 	 */
 	@Override
 	protected AlreadyPaged<Patient> doSearch(RequestContext context) {
-		String q = context.getParameter("q");
-		String gender = context.getParameter("gender");
-		String toString = context.getParameter("to");
-		String fromString = context.getParameter("from");
-		String birthdateString = context.getParameter("birthdate");
-		Integer to = (toString == null) ? null : Integer.parseInt(toString);
-		Integer from = (fromString == null) ? null : Integer.parseInt(fromString);
-		Date birthdate = (birthdateString == null) ? null : new Date(Long.valueOf(birthdateString));
-		List<Patient> patients = Context.getService(PatientSearchCriteriaService.class).getPatients(null, q, null, true,
-		    gender, from, to, birthdate);
-		Long count = Long.valueOf(patients.size());
-		boolean hasMore = count > context.getStartIndex() + context.getLimit();
-		return new AlreadyPaged<Patient>(context, patients, hasMore, count);
+		return new ServiceSearcher<Patient>(PatientService.class, "getPatients", "getCountOfPatients").search(
+		    context.getParameter("query"), context);
 	}
 	
 	/**
@@ -280,6 +225,7 @@ public class PatientSearchCriteriaResource extends DataDelegatingCrudResource<Pa
 		return ConversionUtil.convertToRepresentation(patient, Representation.DEFAULT);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public Patient getPatientForUpdate(String uuid, Map<String, Object> propertiesToUpdate) {
 		Patient patient = getByUniqueId(uuid);
 		PersonResource1_8 personResource = (PersonResource1_8) Context.getService(RestService.class)
