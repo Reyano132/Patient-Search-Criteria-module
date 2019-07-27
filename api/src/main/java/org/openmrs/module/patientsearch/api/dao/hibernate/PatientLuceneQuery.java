@@ -54,6 +54,7 @@ public class PatientLuceneQuery {
 		} else {
 			luceneQuery.skipSame("personId");
 		}
+		luceneQuery.include("isPatient", true);
 		
 		return luceneQuery;
 		
@@ -90,7 +91,7 @@ public class PatientLuceneQuery {
 		} else {
 			luceneQuery.skipSame("personId");
 		}
-		
+		luceneQuery.include("isPatient", true);
 		return luceneQuery;
 		
 	}
@@ -126,7 +127,7 @@ public class PatientLuceneQuery {
 		} else {
 			luceneQuery.skipSame("personId");
 		}
-		
+		luceneQuery.include("isPatient", true);
 		return luceneQuery;
 		
 	}
