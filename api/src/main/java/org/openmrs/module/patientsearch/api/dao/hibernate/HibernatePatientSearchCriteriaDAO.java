@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.SessionFactory;
@@ -12,12 +13,10 @@ import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.Person;
-import org.openmrs.PersonName;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.db.DAOException;
 import org.openmrs.api.db.hibernate.HibernatePatientDAO;
 import org.openmrs.api.db.hibernate.HibernatePersonDAO;
-import org.openmrs.api.db.hibernate.PersonLuceneQuery;
 import org.openmrs.api.db.hibernate.search.LuceneQuery;
 import org.openmrs.collection.ListPart;
 import org.openmrs.module.patientsearch.api.dao.PatientSearchCriteriaDAO;
@@ -39,287 +38,83 @@ public class HibernatePatientSearchCriteriaDAO extends HibernatePatientDAO imple
 	}
 	
 	@Override
-	public List<Patient> getPatients(String gender, Integer start, Integer length, Boolean includeVoided)
-			throws DAOException {
-		Integer tmpStart = start;
-		if (tmpStart == null) {
-			tmpStart = 0;
-		}
-		Integer maxLength = HibernatePersonDAO.getMaximumSearchResults();
-		Integer tmpLength = length;
-		if (tmpLength == null || tmpLength > maxLength) {
-			tmpLength = maxLength;
-		}
-
-		List<Patient> patients = new LinkedList<>();
-
+	public List<Patient> getPatientsByGender(String gender, Integer start, Integer length, Boolean includeVoided)
+	        throws DAOException {
+		
 		PatientLuceneQuery patientLuceneQuery = new PatientLuceneQuery(sessionFactory);
 		LuceneQuery<Person> genderQuery = patientLuceneQuery.getPatinetWithGender(gender, includeVoided);
-		long namesSize = genderQuery.resultSize();
-		if (namesSize > tmpStart) {
-			ListPart<Object[]> patientGenders = genderQuery.listPartProjection(tmpStart, tmpLength, "personId");
-			patientGenders.getList().forEach(patient -> patients.add(getPatient((Integer) patient[0])));
-		} 
-
-		return patients;
+		return getPatientsWithLuceneQuery(genderQuery, start, length);
 	}
 	
 	@Override
-	public List<Patient> getPatients(Date from, Date to, Integer start, Integer length, Boolean includeVoided)
-			throws DAOException {
-		Integer tmpStart = start;
-		if (tmpStart == null) {
-			tmpStart = 0;
-		}
-		Integer maxLength = HibernatePersonDAO.getMaximumSearchResults();
-		Integer tmpLength = length;
-		if (tmpLength == null || tmpLength > maxLength) {
-			tmpLength = maxLength;
-		}
-
-		List<Patient> patients = new LinkedList<>();
-
+	public List<Patient> getPatientsByRangeOfAge(Date from, Date to, Integer start, Integer length, Boolean includeVoided)
+	        throws DAOException {
+		
 		PatientLuceneQuery personLuceneQuery = new PatientLuceneQuery(sessionFactory);
 		LuceneQuery<Person> ageQuery = personLuceneQuery.getPatinetWithAgeRange(from, to, includeVoided);
-		
-		long namesSize = ageQuery.resultSize();
-		if (namesSize > tmpStart) {
-			ListPart<Object[]> patientAge = ageQuery.listPartProjection(tmpStart, tmpLength, "personId");
-			patientAge.getList().forEach(patient -> patients.add(getPatient((Integer) patient[0])));
-		} 
-
-		return patients;
+		return getPatientsWithLuceneQuery(ageQuery, start, length);
 	}
 	
 	@Override
-	public List<Patient> getPatients(Date birthdate, Integer start, Integer length, Boolean includeVoided)
-			throws DAOException {
-		Integer tmpStart = start;
-		if (tmpStart == null) {
-			tmpStart = 0;
-		}
-		Integer maxLength = HibernatePersonDAO.getMaximumSearchResults();
-		Integer tmpLength = length;
-		if (tmpLength == null || tmpLength > maxLength) {
-			tmpLength = maxLength;
-		}
-
-		List<Patient> patients = new LinkedList<>();
-
-		
+	public List<Patient> getPatientsByBirthdate(Date birthdate, Integer start, Integer length, Boolean includeVoided)
+	        throws DAOException {
 		
 		PatientLuceneQuery personLuceneQuery = new PatientLuceneQuery(sessionFactory);
 		LuceneQuery<Person> birthdateQuery = personLuceneQuery.getPatinetWithBirthdate(birthdate, includeVoided);
-		
-		long namesSize = birthdateQuery.resultSize();
-		if (namesSize > tmpStart) {
-			ListPart<Object[]> patientBirthdate = birthdateQuery.listPartProjection(tmpStart, tmpLength, "personId");
-			patientBirthdate.getList().forEach(patient -> patients.add(getPatient((Integer) patient[0])));
-		} 
-
-		return patients;
+		return getPatientsWithLuceneQuery(birthdateQuery, start, length);
 	}
 	
 	@Override
-	public List<Patient> getPatients(String query, String gender, Integer start, Integer length, Boolean includeVoided)
+	public List<Patient> getPatientsByNameOrIdAndGender(String query, String gender, Integer start, Integer length, Boolean includeVoided)
 	        throws DAOException {
-		List<Patient> patients = findPatients(query, includeVoided, start, length);
-		List<Patient> result=new LinkedList<>();
-		for (Patient p : patients) {
-			if (p.getGender().equals(gender)) {
-				result.add(p);
-			}
-		}
-		return result;
+		return findPatients(query, includeVoided, start, length).stream().filter(patient -> patient.getGender().equals(gender)).collect(Collectors.toList());
 	}
 	
 	@Override
-	public List<Patient> getPatients(String query, Date from, Date to, Integer start, Integer length,
+	public List<Patient> getPatientsByNameOrIdAndRangeOfAge(String query, Date from, Date to, Integer start, Integer length,
 	        Boolean includeVoided) throws DAOException {
-		Integer tmpStart = start;
-		if (tmpStart == null) {
-			tmpStart = 0;
-		}
-		Integer maxLength = HibernatePersonDAO.getMaximumSearchResults();
-		Integer tmpLength = length;
-		if (tmpLength == null || tmpLength > maxLength) {
-			tmpLength = maxLength;
-		}
-		query = LuceneQuery.escapeQuery(query);
-
-		List<Patient> patients = new LinkedList<>();
-
-		String minChars = Context.getAdministrationService().getGlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_MIN_SEARCH_CHARACTERS);
-
-		if (minChars == null || !StringUtils.isNumeric(minChars)) {
-			minChars = "" + OpenmrsConstants.GLOBAL_PROPERTY_DEFAULT_MIN_SEARCH_CHARACTERS;
-		}
-		if (query.length() < Integer.valueOf(minChars)) {
-			return patients;
-		}
 		
 		PatientLuceneQuery patientLuceneQuery=new PatientLuceneQuery(sessionFactory);
 		LuceneQuery<Person> ageQuery=patientLuceneQuery.getPatinetWithAgeRange(from, to, includeVoided);
-		List<Integer> tmp=new ArrayList<>();
-		List<Object[]> tmpPatientId=ageQuery.listProjection("personId");
-		tmpPatientId.forEach(id->tmp.add((Integer)id[0]));
-
-		LuceneQuery<PatientIdentifier> identifierQuery = getPatientIdentifierLuceneQuery(query, includeVoided, false);
-
-		long identifiersSize = identifierQuery.resultSize();
-		if (identifiersSize > tmpStart) {
-			ListPart<Object[]> patientIdentifiers = identifierQuery.listPartProjection(tmpStart, tmpLength, "patient.personId");
-			patientIdentifiers.getList().forEach(patientIdentifier -> {if(tmp.contains((Integer)patientIdentifier[0])) patients.add(getPatient((Integer)patientIdentifier[0]));});
-
-			tmpLength -= patientIdentifiers.getList().size();
-			tmpStart = 0;
-		} else {
-			tmpStart -= (int) identifiersSize;
-		}
-
-		if (tmpLength == 0) {
-			return patients;
-		}
-
-		PersonLuceneQuery personLuceneQuery = new PersonLuceneQuery(sessionFactory);
-
-		LuceneQuery<PersonName> nameQuery = personLuceneQuery.getPatientNameQuery(query, includeVoided, identifierQuery);
-		
-		long namesSize = nameQuery.resultSize();
-		if (namesSize > tmpStart) {
-			ListPart<Object[]> personNames = nameQuery.listPartProjection(tmpStart, tmpLength, "person.personId");
-			personNames.getList().forEach(personName ->{if(tmp.contains((Integer)personName[0])) patients.add(getPatient((Integer) personName[0]));});
-			tmpLength -= personNames.getList().size();
-			tmpStart = 0;
-		} 
-		
-		return patients;
-
+		List<Patient> temp=getPatientsWithLuceneQuery(ageQuery,start,length);
+		return findPatients(query, includeVoided, start, length).stream().filter(patient -> temp.contains(patient)).collect(Collectors.toList());
 	}
 	
 	@Override
-	public List<Patient> getPatients(String query,Date birthdate, Integer start, Integer length,
+	public List<Patient> getPatientsByNameOrIdAndBirthdate(String query,Date birthdate, Integer start, Integer length,
 	        Boolean includeVoided) throws DAOException {
-		Integer tmpStart = start;
-		if (tmpStart == null) {
-			tmpStart = 0;
-		}
-		Integer maxLength = HibernatePersonDAO.getMaximumSearchResults();
-		Integer tmpLength = length;
-		if (tmpLength == null || tmpLength > maxLength) {
-			tmpLength = maxLength;
-		}
-		query = LuceneQuery.escapeQuery(query);
-
-		List<Patient> patients = new LinkedList<>();
-
-		String minChars = Context.getAdministrationService().getGlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_MIN_SEARCH_CHARACTERS);
-
-		if (minChars == null || !StringUtils.isNumeric(minChars)) {
-			minChars = "" + OpenmrsConstants.GLOBAL_PROPERTY_DEFAULT_MIN_SEARCH_CHARACTERS;
-		}
-		if (query.length() < Integer.valueOf(minChars)) {
-			return patients;
-		}
 		
 		PatientLuceneQuery patientLuceneQuery=new PatientLuceneQuery(sessionFactory);
 		LuceneQuery<Person> birthdateQuery=patientLuceneQuery.getPatinetWithBirthdate(birthdate, includeVoided);
-		List<Integer> tmp=new ArrayList<>();
-		List<Object[]> tmpPatientId=birthdateQuery.listProjection("personId");
-		tmpPatientId.forEach(id->tmp.add((Integer)id[0]));
-		LuceneQuery<PatientIdentifier> identifierQuery = getPatientIdentifierLuceneQuery(query, includeVoided, false);
-
-		long identifiersSize = identifierQuery.resultSize();
-		if (identifiersSize > tmpStart) {
-			ListPart<Object[]> patientIdentifiers = identifierQuery.listPartProjection(tmpStart, tmpLength, "patient.personId");
-			patientIdentifiers.getList().forEach(patientIdentifier -> {if(tmp.contains((Integer)patientIdentifier[0])) patients.add(getPatient((Integer)patientIdentifier[0]));});
-
-			tmpLength -= patientIdentifiers.getList().size();
-			tmpStart = 0;
-		} else {
-			tmpStart -= (int) identifiersSize;
-		}
-
-		if (tmpLength == 0) {
-			return patients;
-		}
-
-		PersonLuceneQuery personLuceneQuery = new PersonLuceneQuery(sessionFactory);
-
-		LuceneQuery<PersonName> nameQuery = personLuceneQuery.getPatientNameQuery(query, includeVoided, identifierQuery);
-		
-		long namesSize = nameQuery.resultSize();
-		if (namesSize > tmpStart) {
-			ListPart<Object[]> personNames = nameQuery.listPartProjection(tmpStart, tmpLength, "person.personId");
-			personNames.getList().forEach(personName ->{if(tmp.contains((Integer)personName[0])) patients.add(getPatient((Integer) personName[0]));});
-			tmpLength -= personNames.getList().size();
-			tmpStart = 0;
-		} 
-		return patients;
-
+		List<Patient> temp=getPatientsWithLuceneQuery(birthdateQuery,start,length);
+		return findPatients(query, includeVoided, start, length).stream().filter(patient -> temp.contains(patient)).collect(Collectors.toList());
 	}
 	
 	@Override
-	public List<Patient> getPatients(String query, String gender, Date from, Date to, Integer start, Integer length,
+	public List<Patient> getPatientsByNameOrIdAndGenderAndRangeOfAge(String query, String gender, Date from, Date to, Integer start, Integer length,
 	        Boolean includeVoided) throws DAOException {
-		List<Patient> patients = getPatients(query, from, to, start, length, includeVoided);
-		List<Patient> result= new LinkedList<>();
-		for (Patient p : patients) {
-			if (p.getGender().equals(gender)) {
-				result.add(p);
-			}
-		}
-		return result;
+		return getPatientsByNameOrIdAndRangeOfAge(query, from, to, start, length, includeVoided).stream().filter(patient -> patient.getGender().equals(gender)).collect(Collectors.toList());
 	}
 	
 	@Override
-	public List<Patient> getPatients(String query, String gender, Date birthdate, Integer start, Integer length,
-	        Boolean includeVoided) throws DAOException {
-		List<Patient> patients = getPatients(query, birthdate, start, length, includeVoided);
-		List<Patient> result=new LinkedList<>();
-		for (Patient p : patients) {
-			if (p.getGender().equals(gender)) {
-				result.add(p);
-			}
-		}
-		return result;
+	public List<Patient> getPatientsByNameOrIdAndGenderAndBirthdate(String query, String gender, Date birthdate, Integer start, Integer length,
+	        Boolean includeVoided) throws DAOException {	
+		return getPatientsByNameOrIdAndBirthdate(query, birthdate, start, length, includeVoided).stream().filter(patient -> patient.getGender().equals(gender)).collect(Collectors.toList());
 	}
 	
 	@Override
 	public List<Patient> getPatientsByGenderAndBirthdate(String gender, Date birthdate, Integer start, Integer length,
 			Boolean includeVoided) throws DAOException {
-		Integer tmpStart = start;
-		if (tmpStart == null) {
-			tmpStart = 0;
-		}
-		Integer maxLength = HibernatePersonDAO.getMaximumSearchResults();
-		Integer tmpLength = length;
-		if (tmpLength == null || tmpLength > maxLength) {
-			tmpLength = maxLength;
-		}
-
-		List<Patient> patients = new LinkedList<>();
-		List<Patient> result=new LinkedList<>();
-		
-		PatientLuceneQuery personLuceneQuery = new PatientLuceneQuery(sessionFactory);
-		LuceneQuery<Person> birthdateQuery = personLuceneQuery.getPatinetWithBirthdate(birthdate, includeVoided);
-		long namesSize = birthdateQuery.resultSize();
-		if (namesSize > tmpStart) {
-			ListPart<Object[]> patientNames = birthdateQuery.listPartProjection(tmpStart, tmpLength, "personId");
-			patientNames.getList().forEach(patientName -> patients.add(getPatient((Integer) patientName[0])));
-			for(Patient p:patients) {
-				if(p.getGender().equals(gender)) {
-					result.add(p);
-				}
-			}
-		} 
-		
-		return result;
+		return getPatientsByBirthdate(birthdate, start, length, includeVoided).stream().filter(patient -> patient.getGender().equals(gender)).collect(Collectors.toList());
 	}
 	
 	@Override
 	public List<Patient> getPatientsByGenderAndAge(String gender, Date from, Date to, Integer start, Integer length,
 			Boolean includeVoided) throws DAOException {
+		return getPatientsByRangeOfAge(from, to, start, length, includeVoided).stream().filter(patient -> patient.getGender().equals(gender)).collect(Collectors.toList());
+	}
+	
+	private List<Patient> getPatientsWithLuceneQuery(LuceneQuery<Person> query, Integer start, Integer length){
 		Integer tmpStart = start;
 		if (tmpStart == null) {
 			tmpStart = 0;
@@ -331,21 +126,16 @@ public class HibernatePatientSearchCriteriaDAO extends HibernatePatientDAO imple
 		}
 
 		List<Patient> patients = new LinkedList<>();
-		List<Patient> result=new LinkedList<>();
-		PatientLuceneQuery personLuceneQuery = new PatientLuceneQuery(sessionFactory);
-		LuceneQuery<Person> ageQuery = personLuceneQuery.getPatinetWithAgeRange(from, to, includeVoided);
-		long namesSize = ageQuery.resultSize();
-		if (namesSize > tmpStart) {
-			ListPart<Object[]> patientNames = ageQuery.listPartProjection(tmpStart, tmpLength, "personId");
-			patientNames.getList().forEach(patientName -> patients.add(getPatient((Integer) patientName[0])));
-			for(Patient p:patients) {
-				if(p.getGender().equals(gender)) {
-					result.add(p);
-				}
-			}
+		
+		long querySize = query.resultSize();
+		if (querySize > tmpStart) {
+			ListPart<Object[]> tempPatients = query.listPartProjection(tmpStart, tmpLength, "personId");
+			tempPatients.getList().forEach(patient -> patients.add(getPatient((Integer) patient[0])));
 		} 
-
-		return result;
+		
+		return patients;
+		
+		
 	}
 	
 	//Below methods will be removed at time of merging with openmrs core. 

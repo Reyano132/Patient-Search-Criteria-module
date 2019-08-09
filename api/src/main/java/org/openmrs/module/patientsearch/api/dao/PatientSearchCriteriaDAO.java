@@ -28,14 +28,14 @@ public interface PatientSearchCriteriaDAO extends PatientDAO {
 	 * @return : list of patients who follow the query regex and having required gender
 	 * @throws DAOException
 	 */
-	public List<Patient> getPatients(String query, String gender, Integer start, Integer length, Boolean includeVoided)
-	        throws DAOException;
+	public List<Patient> getPatientsByNameOrIdAndGender(String query, String gender, Integer start, Integer length,
+	        Boolean includeVoided) throws DAOException;
 	
 	/**
 	 * @return : list of patient having required gender
 	 * @throws DAOException
 	 */
-	public List<Patient> getPatients(String gender, Integer start, Integer length, Boolean includeVoided)
+	public List<Patient> getPatientsByGender(String gender, Integer start, Integer length, Boolean includeVoided)
 	        throws DAOException;
 	
 	/**
@@ -44,7 +44,7 @@ public interface PatientSearchCriteriaDAO extends PatientDAO {
 	 * @return list of patients, who's age is in between the required range
 	 * @throws DAOException
 	 */
-	public List<Patient> getPatients(Date from, Date to, Integer start, Integer length, Boolean includeVoided)
+	public List<Patient> getPatientsByRangeOfAge(Date from, Date to, Integer start, Integer length, Boolean includeVoided)
 	        throws DAOException;
 	
 	/**
@@ -52,7 +52,7 @@ public interface PatientSearchCriteriaDAO extends PatientDAO {
 	 * @return list of patient/s , who's birthdate is similar to required birthdate
 	 * @throws DAOException
 	 */
-	public List<Patient> getPatients(Date birthdate, Integer start, Integer length, Boolean includeVoided)
+	public List<Patient> getPatientsByBirthdate(Date birthdate, Integer start, Integer length, Boolean includeVoided)
 	        throws DAOException;
 	
 	/**
@@ -64,8 +64,8 @@ public interface PatientSearchCriteriaDAO extends PatientDAO {
 	 *         in required range
 	 * @throws DAOException
 	 */
-	public List<Patient> getPatients(String query, String gender, Date from, Date to, Integer start, Integer length,
-	        Boolean includeVoided) throws DAOException;
+	public List<Patient> getPatientsByNameOrIdAndGenderAndRangeOfAge(String query, String gender, Date from, Date to,
+	        Integer start, Integer length, Boolean includeVoided) throws DAOException;
 	
 	/**
 	 * @param query : name or identifier of patient/s
@@ -75,8 +75,8 @@ public interface PatientSearchCriteriaDAO extends PatientDAO {
 	 *         required birthdate
 	 * @throws DAOException
 	 */
-	public List<Patient> getPatients(String query, String gender, Date birthdate, Integer start, Integer length,
-	        Boolean includeVoided) throws DAOException;
+	public List<Patient> getPatientsByNameOrIdAndGenderAndBirthdate(String query, String gender, Date birthdate,
+	        Integer start, Integer length, Boolean includeVoided) throws DAOException;
 	
 	/**
 	 * @param from: lower boundary of range of age
@@ -84,16 +84,16 @@ public interface PatientSearchCriteriaDAO extends PatientDAO {
 	 * @return list of patients who follow the query regex and having age in required range
 	 * @throws DAOException
 	 */
-	public List<Patient> getPatients(String query, Date from, Date to, Integer start, Integer length, Boolean includeVoided)
-	        throws DAOException;
+	public List<Patient> getPatientsByNameOrIdAndRangeOfAge(String query, Date from, Date to, Integer start, Integer length,
+	        Boolean includeVoided) throws DAOException;
 	
 	/**
 	 * @param birthdate: birthdate of patient
 	 * @return list of patients who follow the query regex and having birthdate as required.
 	 * @throws DAOException
 	 */
-	public List<Patient> getPatients(String query, Date birthdate, Integer start, Integer length, Boolean includeVoided)
-	        throws DAOException;
+	public List<Patient> getPatientsByNameOrIdAndBirthdate(String query, Date birthdate, Integer start, Integer length,
+	        Boolean includeVoided) throws DAOException;
 	
 	/**
 	 * @param gender : gender of patients

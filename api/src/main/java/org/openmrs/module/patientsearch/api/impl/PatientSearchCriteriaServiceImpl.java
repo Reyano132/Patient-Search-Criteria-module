@@ -56,46 +56,53 @@ public class PatientSearchCriteriaServiceImpl extends PatientServiceImpl impleme
 			
 			else if (gender != null && to == null && from == null && birthdate == null) {
 				if (name == null && identifier == null) {
-					return dao.getPatients(gender, 0, null, false);
+					return dao.getPatientsByGender(gender, 0, null, false);
 				}
-				return dao.getPatients(name != null ? name : identifier, gender, 0, null, false);
+				return dao.getPatientsByNameOrIdAndGender(name != null ? name : identifier, gender, 0, null, false);
 			}
 			
 			else if (name == null && identifier == null && gender == null && to != null && from != null && birthdate == null) {
-				return dao.getPatients(fromDate, toDate, 0, null, false);
+				return dao.getPatientsByRangeOfAge(fromDate, toDate, 0, null, false);
 			}
 			
 			else if (name == null && identifier == null && gender == null && to == null && from == null && birthdate != null) {
-				return dao.getPatients(birthdate, 0, null, false);
+				return dao.getPatientsByBirthdate(birthdate, 0, null, false);
 			}
 			
 			else {
-				if (name == null && identifier == null) {
-					if (birthdate == null) {
-						return dao.getPatientsByGenderAndAge(gender, fromDate, toDate, 0, null, false);
-					} else {
-						return dao.getPatientsByGenderAndBirthdate(gender, birthdate, 0, null, false);
-					}
-				}
-				if (gender == null) {
-					if (birthdate == null) {
-						return dao.getPatients(name != null ? name : identifier, fromDate, toDate, 0, null, false);
-					} else {
-						return dao.getPatients(name != null ? name : identifier, birthdate, 0, null, false);
-					}
-				}
-				
-				if (birthdate == null) {
-					return dao.getPatients(name != null ? name : identifier, gender, fromDate, toDate, 0, null, false);
-				} else {
-					return dao.getPatients(name != null ? name : identifier, gender, birthdate, 0, null, false);
-				}
+				return getPatientsBySeachCriteria(name, identifier, identifierTypes, gender, fromDate, toDate, birthdate);
 			}
 			
 		} else {
 			return dao.getPatients(name != null ? name : identifier, identifierTypes, matchIdentifierExactly, 0, null);
 		}
 		
+	}
+	
+	private List<Patient> getPatientsBySeachCriteria(String name, String identifier,
+	        List<PatientIdentifierType> identifierTypes, String gender, Date from, Date to, Date birthdate) {
+		if (name == null && identifier == null) {
+			if (birthdate == null) {
+				return dao.getPatientsByGenderAndAge(gender, from, to, 0, null, false);
+			} else {
+				return dao.getPatientsByGenderAndBirthdate(gender, birthdate, 0, null, false);
+			}
+		}
+		if (gender == null) {
+			if (birthdate == null) {
+				return dao.getPatientsByNameOrIdAndRangeOfAge(name != null ? name : identifier, from, to, 0, null, false);
+			} else {
+				return dao.getPatientsByNameOrIdAndBirthdate(name != null ? name : identifier, birthdate, 0, null, false);
+			}
+		}
+		
+		if (birthdate == null) {
+			return dao.getPatientsByNameOrIdAndGenderAndRangeOfAge(name != null ? name : identifier, gender, from, to, 0,
+			    null, false);
+		} else {
+			return dao.getPatientsByNameOrIdAndGenderAndBirthdate(name != null ? name : identifier, gender, birthdate, 0,
+			    null, false);
+		}
 	}
 	
 }

@@ -1,6 +1,5 @@
 package org.openmrs.module.patientsearch.web.resources;
 
-
 import org.openmrs.Patient;
 import org.openmrs.module.patientsearch.web.controller.PatientSearchCriteriaController;
 import org.openmrs.module.webservices.rest.web.RestConstants;
