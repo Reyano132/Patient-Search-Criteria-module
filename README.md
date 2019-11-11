@@ -5,7 +5,7 @@ Patient Search Criteria Module
 
 Description
 -----------
-This is a very basic module which can be used as a starting point in creating a new module.
+This module provides the different patient search criteria which are used in core apps module
 
 Building from Source
 --------------------
